@@ -1,50 +1,86 @@
-#include<iostream>
+#include <bits/stdc++.h>
 using namespace std;
-#define N 5
-void printBoard(int board[N][N]) {
-   for (int i = 0; i < N; i++) {
-      for (int j = 0; j < N; j++)
-         cout << board[i][j] << " ";
-         cout << endl;
-   }
+
+void addSolution(vector< vector<int> > board, vector< vector<int> > &sol, int n) {
+    vector<int> temp;
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<n;j++) {
+            temp.push_back(board[i][j]);
+        }
+    }
+    sol.push_back(temp);
 }
-bool isValid(int board[N][N], int row, int col) {
-   for (int i = 0; i < col; i++) //check whether there is queen in the left or not
-      if (board[row][i])
-         return false;
-   for (int i=row, j=col; i>=0 && j>=0; i--, j--)
-      if (board[i][j]) //check whether there is queen in the left upper diagonal or not
-         return false;
-   for (int i=row, j=col; j>=0 && i<N; i++, j--)
-      if (board[i][j]) //check whether there is queen in the left lower diagonal or not
-         return false;
-   return true;
+
+bool isSafe(int row, int col, vector< vector<int> > board, int n) {
+    // Checking for same row
+    for(int j=col; j>=0; j--) {
+        if(board[row][j] == 1) {
+            return false;
+        }
+    }
+
+    // Checking for left upper diagonal
+    for(int i=row, j=col; i>=0 && j>=0; i--, j--) {
+        if(board[i][j] == 1) {
+            return false;
+        }
+    }
+    
+    // Checking for left lower diagonal
+    for(int i=row, j=col; i<n && j>=0; i++, j--) {
+        if(board[i][j] == 1) {
+            return false;
+        }
+    }
+
+    return true;
 }
-bool solveNQueen(int board[N][N], int col) {
-   if (col >= N) //when N queens are placed successfully
-      return true;
-   for (int i = 0; i < N; i++) { //for each row, check placing of queen is possible or not
-      if (isValid(board, i, col) ) {
-         board[i][col] = 1; //if validate, place the queen at place (i, col)
-         if ( solveNQueen(board, col + 1)) //Go for the other columns recursively
-            return true;
-         board[i][col] = 0; //When no place is vacant remove that queen
-      }
-   }
-   return false; //when no possible order is found
+
+void solve(int col, vector< vector<int> > &solution, vector< vector<int> > &board, int n) {
+    // Base Case
+    if(col == n) {
+        addSolution(board, solution, n);
+        return;
+    }
+
+    for(int row = 0; row < n; row++) {
+        if(isSafe(row, col, board, n)) {
+            board[row][col] = 1;
+            solve(col+1, solution, board, n);
+
+            // Backtracking
+            board[row][col] = 0;
+        }
+    }
 }
-bool checkSolution() {
-   int board[N][N];
-   for(int i = 0; i<N; i++)
-    for(int j = 0; j<N; j++)
-   board[i][j] = 0; //set all elements to 0
-   if ( solveNQueen(board, 0) == false ) { //starting from 0th column
-      cout << "Solution does not exist";
-      return false;
-   }
-   printBoard(board);
-   return true;
+
+vector< vector<int> > nQueens(int n) {
+    vector< vector<int> > solution;
+    vector< vector<int> > board(n, vector<int> (n,0));
+
+    solve(0, solution, board, n);
+    return solution;
 }
+
 int main() {
-   checkSolution();
-}
+    int n;
+    cout << "Enter the value of n : ";
+    cin >> n;
+
+    vector< vector<int> > solution = nQueens(n);
+    int i = 0;
+    int count=0;
+    for(vector<int> x : solution) {
+        cout << endl << "Possible Configuration [" << ++i << "] : "<<endl;
+         for(int y : x) {
+               count++;
+             cout << y << " ";
+               if(count==n){
+                  cout<<endl;
+                  count=0;
+               }
+         }
+    }
+
+    return 0;
+} 
